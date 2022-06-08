@@ -1,18 +1,36 @@
 defmodule GiphyScraper do
-  @moduledoc """
-  Documentation for `GiphyScraper`.
-  """
+  @api_key Application.fetch_env!(:giphy_scraper, :giphy_api_key)
+  @endpoint "api.giphy.com/v1/gifs/search"
 
-  @doc """
-  Hello world.
+  def search(query) do
+    query
+    |> send_request
+    |> parse_response
+    |> build_image_list
+  end
 
-  ## Examples
+  defp send_request(query) do
+    HTTPoison.get(
+      @endpoint,
+      [],
+      params: %{api_key: @api_key, limit: 25, q: query}
+    )
+  end
 
-      iex> GiphyScraper.hello()
-      :world
+  defp parse_response({:ok, response}) do
+    {:ok, response_map} = Jason.decode(response.body)
 
-  """
-  def hello do
-    :world
+    response_map["data"]
+  end
+
+  defp build_image_list(images) do
+    Enum.map(images, fn image ->
+      %GiphyImage{
+        id: image["id"],
+        url: image["url"],
+        username: image["username"],
+        title: image["title"]
+      }
+    end)
   end
 end
