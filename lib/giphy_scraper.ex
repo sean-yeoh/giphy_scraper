@@ -1,5 +1,5 @@
 defmodule GiphyScraper do
-  @api_key Application.fetch_env!(:giphy_scraper, :giphy_api_key)
+  @api_key Application.compile_env!(:giphy_scraper, :giphy_api_key)
   @endpoint "api.giphy.com/v1/gifs/search"
 
   def search(query) do
